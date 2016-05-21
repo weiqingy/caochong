@@ -1,1 +1,2 @@
 # mliu-hadoop-and-spark-on-docker
+* small project that will set up a hadoop (and perhaps spark) cluster on docker containers on a single machine. This project contains some script and default configuration files. I think this outperforms the psudo-distributed Hadoop cluster on a single machine (which is nontrivial to run HA namenode and >3 datanode) and setting up a real QE cluster (which is not complex and heavy). Moreover, it’s very convenient for debugging and testing operations. We can also consider making the code public in the future.
