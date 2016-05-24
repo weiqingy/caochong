@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property>
+		<name>dfs.replication</name>
+		<value>3</value>
+	</property>
+    <property>
+		<name>dfs.namenode.name.dir</name>
+        <value>/hadoop/name</value>
+	</property>
+    <property>
+		<name>dfs.datanode.data.dir</name>
+        <value>/hadoop/data</value>
+	</property>
+    <property>
+		<name>dfs.blocksize</name>
+        <value>268435456</value>
+	</property>
+    <property>
+		<name>dfs.namenode.handler.count</name>
+        <value>10</value>
+	</property>
+</configuration>
