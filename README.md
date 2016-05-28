@@ -1,2 +1,9 @@
-# mliu-hadoop-and-spark-on-docker
-* small project that will set up a hadoop (and perhaps spark) cluster on docker containers on a single machine. This project contains some script and default configuration files. I think this outperforms the psudo-distributed Hadoop cluster on a single machine (which is nontrivial to run HA namenode and >3 datanode) and setting up a real QE cluster (which is not complex and heavy). Moreover, it’s very convenient for debugging and testing operations. We can also consider making the code public in the future.
+# Hadoop and Spark on Docker
+
+This tool sets up a Hadoop and Spark cluster within Docker containers on a **single machine**. The real cluster in Docker container outperforms the psudo-distributed Hadoop cluster on a single machine (which is nontrivial to run HA mode and launch multiple datanodes) and setting up a real QE cluster (which is complex and heavy). It's convenient for debugging and testing operations.
+
+## Usage
+TBD
+
+## License
+Unlike all other Apache projects which use Apache license, this project uses an advanced and modern license named The Star And Thank Author License (SATA). Please see the [LICENSE](LICENSE) file for more information.
