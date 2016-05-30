@@ -1,21 +1,23 @@
 # Dockerfile for installing the necessary dependencies for running Hadoop and Spark
 
-FROM ubuntu:14.04
+FROM ubuntu:latest
 
 MAINTAINER Mingliang Liu <mliu@hortonworks.com>
+MAINTAINER Weiqing Yang <wyang@hortonworks.com>
 
 RUN apt-get update -y
 RUN apt-get upgrade -y
 
 # install openssh-server and openjdk
 RUN apt-get install -y openssh-server
-RUN apt-get install -y openjdk-7-jdk
-ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
+RUN apt-get install -y openjdk-8-jdk
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 ENV PATH $PATH:$JAVA_HOME/bin
+
+RUN echo 'root:hortonworks' | chpasswd
 
 RUN mkdir /var/run/sshd && \
     sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
-
 # configure ssh free key access
 RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -P '' && \
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
