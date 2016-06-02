@@ -17,18 +17,23 @@ cd -
 
 docker build -t hadoop-and-spark-on-docker-base .
 
-cat > files/Dockerfile << EOF
+mkdir tmp
+# Copy hadoop and spark packages
+cp -r $HADOOP_TARGET_SNAPSHOT tmp
+cp files/* tmp
+
+# Generate docker file
+cat > tmp/Dockerfile << EOF
 FROM hadoop-and-spark-on-docker-base
 
 ENV HADOOP_HOME /hadoop
-ADD $HADOOP_TARGET_SNAPSHOT \$HADOOP_HOME
-RUN mkdir -p \$HADOOP_HOME/etc/hadoop/conf
-ADD *.xml \$HADOOP_HOME/etc/hadoop/conf/
+ADD $(basename $HADOOP_TARGET_SNAPSHOT) \$HADOOP_HOME
+ADD *.xml \$HADOOP_HOME/etc/hadoop/
 EOF
 
-docker rmi hadoop-and-spark-on-docker
-docker build -t "hadoop-and-spark-on-docker" files
-rm -f files/Dockerfile
+docker rmi -f hadoop-and-spark-on-docker
+docker build -t "hadoop-and-spark-on-docker" tmp
+rm -rf tmp
 
 #for i in $(seq 10);
 #do
