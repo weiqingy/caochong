@@ -4,7 +4,7 @@
 HADOOP_SRC_HOME=$HOME/Workspace/hadoop
 cd $HADOOP_SRC_HOME
 echo "Building Hadoop...."
-#mvn package -DskipTests -Dtar -Pdist -q || exit 1
+mvn package -DskipTests -Dtar -Pdist -q || exit 1
 HADOOP_TARGET_SNAPSHOT=$(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-*-SNAPSHOT')
 cd -
 
