@@ -17,17 +17,22 @@ cd -
 
 docker build -t hadoop-and-spark-on-docker-base .
 
-docker build -t "hadoop-and-spark-on-docker" - << EOF
+cat > files/Dockerfile << EOF
 FROM hadoop-and-spark-on-docker-base
 
-ENV HADOOP_HOME /usr/lib/hadoop
+ENV HADOOP_HOME /hadoop
 ADD $HADOOP_TARGET_SNAPSHOT \$HADOOP_HOME
-ADD files/* \$HADOOP_HOME/etc/hadoop/conf
+RUN mkdir -p \$HADOOP_HOME/etc/hadoop/conf
+ADD *.xml \$HADOOP_HOME/etc/hadoop/conf/
 EOF
+
+docker rmi hadoop-and-spark-on-docker
+docker build -t "hadoop-and-spark-on-docker" files
+rm -f files/Dockerfile
 
 #for i in $(seq 10);
 #do
     #docker run hadoop-and-spark-on-docker
 #done
 
-#ssh nn
+docker run -it hadoop-and-spark-on-docker
