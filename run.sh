@@ -18,7 +18,7 @@ docker build -t hadoop-and-spark-on-docker-base .
 # Prepare hadoop and spark packages and configuration files
 mkdir tmp
 cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
-cp files/* tmp/hadoop/etc/hadoop/
+cp hadoop/* tmp/hadoop/etc/hadoop/
 
 # Generate docker file
 cat > tmp/Dockerfile << EOF

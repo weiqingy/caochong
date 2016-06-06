@@ -8,14 +8,14 @@ MAINTAINER Weiqing Yang <wyang@hortonworks.com>
 RUN apt-get update -y
 RUN apt-get upgrade -y
 
-# install openssh-server and openjdk
-RUN apt-get install -y openssh-server
+# install openjdk
 RUN apt-get install -y openjdk-8-jdk
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 ENV PATH $PATH:$JAVA_HOME/bin
 
+# install and configure ssh service
+RUN apt-get install -y openssh-server
 RUN echo 'root:hortonworks' | chpasswd
-
 RUN mkdir /var/run/sshd && \
     sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 # configure ssh free key access
