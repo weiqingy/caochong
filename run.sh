@@ -34,9 +34,10 @@ docker build -t "hadoop-and-spark-on-docker" tmp
 # Cleanup
 rm -rf tmp
 
-#for i in $(seq 10);
-#do
-    #docker run hadoop-and-spark-on-docker
-#done
+for i in $(seq 1);
+do
+    container_id=$(docker run -d hadoop-and-spark-on-docker)
+done
 
-docker run -it hadoop-and-spark-on-docker
+docker exec -it $container_id /bin/bash
+

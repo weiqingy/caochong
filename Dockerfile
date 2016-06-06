@@ -22,4 +22,10 @@ RUN mkdir /var/run/sshd && \
 RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -P '' && \
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
+# set supervisor
+RUN apt-get install -y supervisor
+ADD supervisor/sshd.conf /etc/supervisor/conf.d/sshd.conf
+
 EXPOSE 22 7373 7946 9000 50010 50020 50070 50075 50090 50475 8030 8031 8032 8033 8040 8042 8060 8088 50060
+
+CMD /usr/bin/supervisord -n
