@@ -57,12 +57,9 @@ while [ "$1" != "" ]; do
 			;;
 		--build-hadoop)
 			BUILD_HADOOP=1
-			BUILD_SPARK=1
-			BUILD_DOCKER=1
 			;;
 		--build-spark)
 			BUILD_SPARK=1
-			BUILD_DOCKER=1
 			;;
 		--build-docker)
 			BUILD_DOCKER=1
@@ -76,16 +73,21 @@ while [ "$1" != "" ]; do
 	shift
 done
 
+HADOOP_TARGET_SNAPSHOT=$(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-*-SNAPSHOT')
+if [[ -z $HADOOP_TARGET_SNAPSHOT && $BUILD_HADOOP -eq 0 ]]; then
+	echo "No hadoop target found, will forcefully build hadoop."
+	BUILD_HADOOP=1
+fi
 
 if [[ $BUILD_HADOOP -eq 1 ]]; then
 	build_hadoop
 fi
 
-if [[ $BUILD_SPARK -eq 1 ]]; then
+if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 ]]; then
 	build_spark
 fi
 
-if [[ $BUILD_DOCKER -eq 1 ]]; then
+if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 || $BUILD_DOCKER -eq 1 ]]; then
 	build_docker
 fi
 
