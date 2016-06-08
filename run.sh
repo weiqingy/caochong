@@ -3,6 +3,7 @@
 HADOOP_SRC_HOME=$HOME/Workspace/hadoop
 SPARK_SRC_HOME=$HOME/Workspace/spark
 
+let DISABLE_SPARK=0
 let BUILD_HADOOP=0
 let BUILD_SPARK=0
 let BUILD_DOCKER=0
@@ -31,12 +32,21 @@ function build_docker() {
 	cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
 	cp hadoop/* tmp/hadoop/etc/hadoop/
 
+	if [[ $DISABLE_SPARK -eq 0 ]]; then
+		mkdir tmp/spark # TODO replace this line holder
+	else
+		mkdir tmp/spark # TODO replace this line holder
+	fi
+
 	# Generate docker file
 cat > tmp/Dockerfile << EOF
 	FROM hadoop-and-spark-on-docker-base
 
 	ENV HADOOP_HOME /hadoop
 	ADD hadoop \$HADOOP_HOME
+
+	ENV SPARK_HOME /spark
+	ADD spark \$SPARK_HOME
 EOF
 
 	docker rmi -f hadoop-and-spark-on-docker
@@ -55,6 +65,9 @@ while [ "$1" != "" ]; do
 			usage
 			exit
 			;;
+		--disable-spark)
+			DISABLE_SPARK=1
+			;;
 		--build-hadoop)
 			BUILD_HADOOP=1
 			;;
@@ -72,6 +85,16 @@ while [ "$1" != "" ]; do
 	esac
 	shift
 done
+
+if [[ $DISABLE_SPARK -eq 1 ]]; then
+	if [[ $BUILD_SPARK -eq 1 ]]; then
+		echo "Options --disable-spark and --build-spark are mutually exclusive"
+		exit 2
+	elif [[ $BUILD_DOCKER -eq 0 ]]; then
+		echo "Option --disable-spark needs to work with --build-docker"
+		exit 3
+	fi
+fi
 
 HADOOP_TARGET_SNAPSHOT=$(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-*-SNAPSHOT')
 if [[ -z $HADOOP_TARGET_SNAPSHOT && $BUILD_HADOOP -eq 0 ]]; then
