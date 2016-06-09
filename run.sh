@@ -20,7 +20,7 @@ function build_hadoop() {
 
 function build_spark() {
 	echo "Building Spark...."
-	#mvn -f $SPARK_SRC_HOME package -DskipTests -Dtar -Pdist -q || exit 1
+	mvn -f $SPARK_SRC_HOME package -DskipTests -Pyarn -q || exit 1
 }
 
 function build_docker() {
@@ -33,9 +33,7 @@ function build_docker() {
 	cp hadoop/* tmp/hadoop/etc/hadoop/
 
 	if [[ $DISABLE_SPARK -eq 0 ]]; then
-		mkdir tmp/spark # TODO replace this line holder
-	else
-		mkdir tmp/spark # TODO replace this line holder
+		cp -r $SPARK_SRC_HOME tmp/spark
 	fi
 
 	# Generate docker file
@@ -46,6 +44,7 @@ cat > tmp/Dockerfile << EOF
 	ADD hadoop \$HADOOP_HOME
 
 	ENV SPARK_HOME /spark
+	ENV HADOOP_CONF_DIR /hadoop/etc/hadoop
 	ADD spark \$SPARK_HOME
 EOF
 
