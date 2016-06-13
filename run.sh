@@ -62,51 +62,54 @@ EOF
 	fi
 }
 
-# main process starts here
-while [ "$1" != "" ]; do
-	PARAM=`echo $1 | awk -F= '{print $1}'`
-	VALUE=`echo $1 | awk -F= '{print $2}'`
-	case $PARAM in
-		-h | --help)
-			usage
-			exit
-			;;
-		--disable-spark)
-			DISABLE_SPARK=1
-			;;
-		--build-hadoop)
-			BUILD_HADOOP=1
-			;;
-		--build-spark)
-			BUILD_SPARK=1
-			;;
-		--build-docker)
-			BUILD_DOCKER=1
-			;;
-		*)
-			echo "ERROR: unknown parameter \"$PARAM\""
-			usage
-			exit 1
-			;;
-	esac
-	shift
-done
+function parse_arguments() {
+	while [ "$1" != "" ]; do
+		PARAM=`echo $1 | awk -F= '{print $1}'`
+		VALUE=`echo $1 | awk -F= '{print $2}'`
+		case $PARAM in
+			-h | --help)
+				usage
+				exit
+				;;
+			--disable-spark)
+				DISABLE_SPARK=1
+				;;
+			--build-hadoop)
+				BUILD_HADOOP=1
+				;;
+			--build-spark)
+				BUILD_SPARK=1
+				;;
+			--build-docker)
+				BUILD_DOCKER=1
+				;;
+			*)
+				echo "ERROR: unknown parameter \"$PARAM\""
+				usage
+				exit 1
+				;;
+		esac
+		shift
+	done
 
-if [[ $DISABLE_SPARK -eq 1 ]]; then
-	if [[ $BUILD_SPARK -eq 1 ]]; then
-		echo "Options --disable-spark and --build-spark are mutually exclusive"
-		exit 2
-	elif [[ $BUILD_DOCKER -eq 0 ]]; then
-		echo "Option --disable-spark needs to work with --build-docker"
-		exit 3
+	if [[ $DISABLE_SPARK -eq 1 ]]; then
+		if [[ $BUILD_SPARK -eq 1 ]]; then
+			echo "Options --disable-spark and --build-spark are mutually exclusive"
+			exit 2
+		elif [[ $BUILD_DOCKER -eq 0 ]]; then
+			echo "Option --disable-spark needs to work with --build-docker"
+			exit 3
+		fi
 	fi
-fi
 
-HADOOP_TARGET_SNAPSHOT=$(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-*-SNAPSHOT')
-if [[ -z $HADOOP_TARGET_SNAPSHOT && $BUILD_HADOOP -eq 0 ]]; then
-	echo "No hadoop target found, will forcefully build hadoop."
-	BUILD_HADOOP=1
-fi
+	HADOOP_TARGET_SNAPSHOT=$(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-*-SNAPSHOT')
+	if [[ -z $HADOOP_TARGET_SNAPSHOT && $BUILD_HADOOP -eq 0 ]]; then
+		echo "No hadoop target found, will forcefully build hadoop."
+		BUILD_HADOOP=1
+	fi
+}
+
+parse_arguments $@
 
 build_hadoop
 
