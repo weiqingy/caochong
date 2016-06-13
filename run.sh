@@ -8,51 +8,58 @@ let BUILD_HADOOP=0
 let BUILD_SPARK=0
 let BUILD_DOCKER=0
 
+rm -rf tmp/ && mkdir tmp
+
 function usage() {
 	echo "Usage"
 }
 
 function build_hadoop() {
-	echo "Building Hadoop...."
-	mvn -f $HADOOP_SRC_HOME package -DskipTests -Dtar -Pdist -q || exit 1
-	HADOOP_TARGET_SNAPSHOT=$(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-*-SNAPSHOT')
+	if [[ $BUILD_HADOOP -eq 1 ]]; then
+		echo "Building Hadoop...."
+		mvn -f $HADOOP_SRC_HOME package -DskipTests -Dtar -Pdist -q || exit 1
+		HADOOP_TARGET_SNAPSHOT=$(find $HADOOP_SRC_HOME/hadoop-dist/ -type d -name 'hadoop-*-SNAPSHOT')
+
+		# Prepare hadoop packages and configuration files
+		cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
+		cp hadoop/* tmp/hadoop/etc/hadoop/
+	fi
 }
 
 function build_spark() {
-	echo "Building Spark...."
-	mvn -f $SPARK_SRC_HOME package -DskipTests -Pyarn -q || exit 1
+	if [[ $DISABLE_SPARK -eq 0 ]]; then
+		if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 ]]; then
+			echo "Building Spark...."
+			mvn -f $SPARK_SRC_HOME package -DskipTests -Pyarn -q || exit 1
+			# Prepare hadoop packages and configuration files
+		fi
+		cp -r $SPARK_SRC_HOME tmp/spark
+	fi
 }
 
 function build_docker() {
-	echo "Building Docker...."
-	docker build -t hadoop-and-spark-on-docker-base .
+	if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 || $BUILD_DOCKER -eq 1 ]]; then
+		echo "Building Docker...."
+		docker build -t hadoop-and-spark-on-docker-base .
 
-	# Prepare hadoop and spark packages and configuration files
-	mkdir tmp
-	cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
-	cp hadoop/* tmp/hadoop/etc/hadoop/
-
-	if [[ $DISABLE_SPARK -eq 0 ]]; then
-		cp -r $SPARK_SRC_HOME tmp/spark
-	fi
-
-	# Generate docker file
+		# Generate docker file
 cat > tmp/Dockerfile << EOF
-	FROM hadoop-and-spark-on-docker-base
+		FROM hadoop-and-spark-on-docker-base
 
-	ENV HADOOP_HOME /hadoop
-	ADD hadoop \$HADOOP_HOME
+		ENV HADOOP_HOME /hadoop
+		ADD hadoop \$HADOOP_HOME
 
-	ENV SPARK_HOME /spark
-	ENV HADOOP_CONF_DIR /hadoop/etc/hadoop
-	ADD spark \$SPARK_HOME
+		ENV SPARK_HOME /spark
+		ENV HADOOP_CONF_DIR /hadoop/etc/hadoop
+		ADD spark \$SPARK_HOME
 EOF
 
-	docker rmi -f hadoop-and-spark-on-docker
-	docker build -t "hadoop-and-spark-on-docker" tmp
+		docker rmi -f hadoop-and-spark-on-docker
+		docker build -t "hadoop-and-spark-on-docker" tmp
 
-	# Cleanup
-	rm -rf tmp
+		# Cleanup
+		rm -rf tmp
+	fi
 }
 
 # main process starts here
@@ -101,17 +108,11 @@ if [[ -z $HADOOP_TARGET_SNAPSHOT && $BUILD_HADOOP -eq 0 ]]; then
 	BUILD_HADOOP=1
 fi
 
-if [[ $BUILD_HADOOP -eq 1 ]]; then
-	build_hadoop
-fi
+build_hadoop
 
-if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 ]]; then
-	build_spark
-fi
+build_spark
 
-if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 || $BUILD_DOCKER -eq 1 ]]; then
-	build_docker
-fi
+build_docker
 
 for i in $(seq 1);
 do
