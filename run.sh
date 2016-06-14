@@ -31,7 +31,6 @@ function build_spark() {
 		if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 ]]; then
 			echo "Building Spark...."
 			mvn -f $SPARK_SRC_HOME package -DskipTests -Pyarn -q || exit 1
-			# Prepare hadoop packages and configuration files
 		fi
 		cp -r $SPARK_SRC_HOME tmp/spark
 	fi
