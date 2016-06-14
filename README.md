@@ -14,6 +14,7 @@ The distributed cluster in Docker containers outperforms its counterparts:
 
 1. _[psudo-distributed Hadoop cluster](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/SingleCluster.html) on a single machine_, which is nontrivial to run HA, to launch multiple datanodes, to test HDFS balancer/mover etc.
 1. _[setting up a real cluster](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html)_, which is complex and heavy to use, and in the first place you can afford a real cluster.
+1. _Managing a cluster of vbox/vmware virtual machines_, nice try. But let's see who runs faster.
 
 ## Usage
 TBD
