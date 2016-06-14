@@ -8,22 +8,31 @@ let BUILD_HADOOP=0
 let BUILD_SPARK=0
 let BUILD_DOCKER=0
 
-rm -rf tmp/ && mkdir tmp
-
 function usage() {
 	echo "Usage"
 }
 
+# @Return the hadoop distribution package for deployment
+function hadoop_target() {
+	echo $(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-*-SNAPSHOT')
+}
+
 function build_hadoop() {
+	HADOOP_TARGET_SNAPSHOT=$(hadoop_target)
+	if [[ -z $HADOOP_TARGET_SNAPSHOT && $BUILD_HADOOP -eq 0 ]]; then
+		echo "No Hadoop target found, will forcefully build hadoop."
+		BUILD_HADOOP=1
+	fi
+
 	if [[ $BUILD_HADOOP -eq 1 ]]; then
 		echo "Building Hadoop...."
 		mvn -f $HADOOP_SRC_HOME package -DskipTests -Dtar -Pdist -q || exit 1
-		HADOOP_TARGET_SNAPSHOT=$(find $HADOOP_SRC_HOME/hadoop-dist/ -type d -name 'hadoop-*-SNAPSHOT')
-
-		# Prepare hadoop packages and configuration files
-		cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
-		cp hadoop/* tmp/hadoop/etc/hadoop/
+		HADOOP_TARGET_SNAPSHOT=$(hadoop_target)
 	fi
+
+	# Prepare hadoop packages and configuration files
+	cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
+	cp hadoop/* tmp/hadoop/etc/hadoop/
 }
 
 function build_spark() {
@@ -38,8 +47,14 @@ function build_spark() {
 
 function build_docker() {
 	if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 || $BUILD_DOCKER -eq 1 ]]; then
+		rm -rf tmp/ && mkdir tmp
+
 		echo "Building Docker...."
 		docker build -t hadoop-and-spark-on-docker-base .
+
+		build_hadoop
+
+		build_spark
 
 		# Generate docker file
 cat > tmp/Dockerfile << EOF
@@ -61,6 +76,7 @@ EOF
 	fi
 }
 
+# Parse and validatet the command line arguments
 function parse_arguments() {
 	while [ "$1" != "" ]; do
 		PARAM=`echo $1 | awk -F= '{print $1}'`
@@ -100,19 +116,9 @@ function parse_arguments() {
 			exit 3
 		fi
 	fi
-
-	HADOOP_TARGET_SNAPSHOT=$(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-*-SNAPSHOT')
-	if [[ -z $HADOOP_TARGET_SNAPSHOT && $BUILD_HADOOP -eq 0 ]]; then
-		echo "No hadoop target found, will forcefully build hadoop."
-		BUILD_HADOOP=1
-	fi
 }
 
 parse_arguments $@
-
-build_hadoop
-
-build_spark
 
 build_docker
 
