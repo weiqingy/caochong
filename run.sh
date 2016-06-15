@@ -46,11 +46,13 @@ function build_spark() {
 }
 
 function build_docker() {
-	if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 || $BUILD_DOCKER -eq 1 ]]; then
-		rm -rf tmp/ && mkdir tmp
-
+	if [[ $BUILD_DOCKER -eq 1 ]]; then
 		echo "Building Docker...."
 		docker build -t hadoop-and-spark-on-docker-base .
+	fi
+
+	if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 || $BUILD_DOCKER -eq 1 ]]; then
+		rm -rf tmp/ && mkdir tmp
 
 		build_hadoop
 
