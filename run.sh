@@ -68,6 +68,8 @@ cat > tmp/Dockerfile << EOF
 		ENV SPARK_HOME /spark
 		ENV HADOOP_CONF_DIR /hadoop/etc/hadoop
 		ADD spark \$SPARK_HOME
+
+		RUN \$HADOOP_HOME/bin/hdfs namenode -format
 EOF
 
 		docker rmi -f hadoop-and-spark-on-docker
@@ -124,10 +126,13 @@ parse_arguments $@
 
 build_docker
 
-for i in $(seq 1);
+let N=3
+# launch master container
+master_id=$(docker run -d --net hadoop-and-spark-on-docker --name master hadoop-and-spark-on-docker)
+for i in $(seq $((N-1)));
 do
-	container_id=$(docker run -d hadoop-and-spark-on-docker)
+	echo -e $(docker run -d --net hadoop-and-spark-on-docker hadoop-and-spark-on-docker) "\n" >> slaves
 done
 
-docker exec -it $container_id /bin/bash
+docker exec -it $master_id /bin/bash
 

@@ -2,14 +2,10 @@
 <configuration>
 	<property>
 		<name>fs.defaultFS</name>
-		<value>hdfs://localhost:9000</value>
+		<value>hdfs://master:9000</value>
 	</property>
 	<property>
 		<name>hadoop.caller.context.enabled</name>
 		<value>true</value>
-	</property>
-	<property>
-		<name>io.file.buffer.size</name>
-		<value>131072</value>
 	</property>
 </configuration>
