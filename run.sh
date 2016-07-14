@@ -129,9 +129,11 @@ build_docker
 let N=3
 # launch master container
 master_id=$(docker run -d --net hadoop-and-spark-on-docker --name master hadoop-and-spark-on-docker)
+rm -f slaves
 for i in $(seq $((N-1)));
 do
-	echo -e $(docker run -d --net hadoop-and-spark-on-docker hadoop-and-spark-on-docker) "\n" >> slaves
+	container_id=$(docker run -d --net hadoop-and-spark-on-docker hadoop-and-spark-on-docker)
+	echo ${container_id:0:12} >> slaves
 done
 
 docker exec -it $master_id /bin/bash
