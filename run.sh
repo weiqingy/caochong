@@ -39,7 +39,7 @@ function build_spark() {
     if [[ $DISABLE_SPARK -eq 0 ]]; then
         if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 ]]; then
             echo "Building Spark...."
-            $SPARK_SRC_HOME/dev/make-distribution.sh --name myspark --tgz -Phive -Phive-thriftserver -Pyarn || exit 1
+            $SPARK_SRC_HOME/dev/make-distribution.sh --name myspark --tgz -Phive -Phive-thriftserver -Pyarn -q || exit 1
         fi
         tar xzf $SPARK_SRC_HOME/*.tgz -C tmp/
         mv tmp/*myspark tmp/spark
