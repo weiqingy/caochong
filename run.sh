@@ -136,6 +136,10 @@ build_docker
 docker network create hadoop-and-spark-on-docker 2> /dev/null
 
 let N=3
+
+# remove the outdated master
+docker rm -f $(docker ps -a -q -f "name=master")
+
 # launch master container
 master_id=$(docker run -d --net hadoop-and-spark-on-docker --name master hadoop-and-spark-on-docker)
 echo ${master_id:0:12} > workers
