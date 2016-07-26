@@ -145,5 +145,9 @@ done
 # Copy the workers file to the master container
 docker cp workers $master_id:$HADOOP_HOME/etc/hadoop/
 
-docker exec -it $master_id /bin/bash
+# Start hdfs and yarn services
+docker exec -it $master_id $HADOOP_HOME/sbin/start-dfs.sh
+docker exec -it $master_id $HADOOP_HOME/sbin/start-yarn.sh
 
+# Connect to the master node
+docker exec -it master /bin/bash
