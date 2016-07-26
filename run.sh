@@ -41,8 +41,8 @@ function build_spark() {
 			echo "Building Spark...."
 			$SPARK_SRC_HOME/dev/make-distribution.sh --name myspark --tgz -Phive -Phive-thriftserver -Pyarn || exit 1
 		fi
-        tar xzf *tgz
-		cp -r $SPARK_SRC_HOME/*myspark/* tmp/spark
+		tar xzf $SPARK_SRC_HOME/*.tgz -C tmp/
+		mv tmp/*myspark tmp/spark
 	fi
 }
 
