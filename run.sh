@@ -6,6 +6,9 @@ SPARK_SRC_HOME=$HOME/Workspace/spark
 # The hadoop home in the docker containers
 HADOOP_HOME=/hadoop
 
+# The spark home in the docker containers
+SPARK_HOME=/spark
+
 let DISABLE_SPARK=0
 let BUILD_HADOOP=0
 let BUILD_SPARK=0
@@ -69,9 +72,9 @@ cat > tmp/Dockerfile << EOF
         ENV HADOOP_HOME $HADOOP_HOME
         ADD hadoop $HADOOP_HOME
 
-        ENV SPARK_HOME /spark
-        ENV HADOOP_CONF_DIR /hadoop/etc/hadoop
-        ADD spark \$SPARK_HOME
+        ENV SPARK_HOME $SPARK_HOME
+        ENV HADOOP_CONF_DIR $HADOOP_HOME/etc/hadoop
+        ADD spark $SPARK_HOME
 
         RUN $HADOOP_HOME/bin/hdfs namenode -format
 EOF
