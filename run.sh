@@ -32,7 +32,7 @@ function build_hadoop() {
 
 	# Prepare hadoop packages and configuration files
 	cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
-	cp hadoop/* tmp/hadoop/etc/hadoop/
+	cp hadoopconf/* tmp/hadoop/etc/hadoop/
 }
 
 function build_spark() {
