@@ -32,7 +32,7 @@ function build_hadoop() {
 
     if [[ $BUILD_HADOOP -eq 1 ]]; then
         echo "Building Hadoop...."
-        mvn -f $HADOOP_SRC_HOME package -DskipTests -Dtar -Pdist -q || exit 1
+        #mvn -f $HADOOP_SRC_HOME package -DskipTests -Dtar -Pdist -q || exit 1
         HADOOP_TARGET_SNAPSHOT=$(hadoop_target)
     fi
 
@@ -45,7 +45,7 @@ function build_spark() {
     if [[ $DISABLE_SPARK -eq 0 ]]; then
         if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 ]]; then
             echo "Building Spark...."
-            $SPARK_SRC_HOME/dev/make-distribution.sh --name myspark --tgz -Phive -Phive-thriftserver -Pyarn 1> /dev/null || exit 1
+            #$SPARK_SRC_HOME/dev/make-distribution.sh --name myspark --tgz -Phive -Phive-thriftserver -Pyarn 1> /dev/null || exit 1
         fi
         tar xzf $SPARK_SRC_HOME/*.tgz -C tmp/
         mv tmp/*myspark tmp/spark
