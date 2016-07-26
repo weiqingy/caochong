@@ -3,6 +3,9 @@
 HADOOP_SRC_HOME=$HOME/Workspace/hadoop
 SPARK_SRC_HOME=$HOME/Workspace/spark
 
+# The hadoop home in the docker containers
+HADOOP_HOME=/hadoop
+
 let DISABLE_SPARK=0
 let BUILD_HADOOP=0
 let BUILD_SPARK=0
@@ -63,14 +66,14 @@ function build_docker() {
 cat > tmp/Dockerfile << EOF
         FROM hadoop-and-spark-on-docker-base
 
-        ENV HADOOP_HOME /hadoop
-        ADD hadoop \$HADOOP_HOME
+        ENV HADOOP_HOME $HADOOP_HOME
+        ADD hadoop $HADOOP_HOME
 
         ENV SPARK_HOME /spark
         ENV HADOOP_CONF_DIR /hadoop/etc/hadoop
         ADD spark \$SPARK_HOME
 
-        RUN \$HADOOP_HOME/bin/hdfs namenode -format
+        RUN $HADOOP_HOME/bin/hdfs namenode -format
 EOF
 
         docker rmi -f hadoop-and-spark-on-docker
@@ -132,12 +135,15 @@ docker network create hadoop-and-spark-on-docker 2> /dev/null
 let N=3
 # launch master container
 master_id=$(docker run -d --net hadoop-and-spark-on-docker --name master hadoop-and-spark-on-docker)
-rm -f slaves
+echo ${master_id:0:12} > workers
 for i in $(seq $((N-1)));
 do
     container_id=$(docker run -d --net hadoop-and-spark-on-docker hadoop-and-spark-on-docker)
-    echo ${container_id:0:12} >> slaves
+    echo ${container_id:0:12} >> workers
 done
+
+# Copy the workers file to the master container
+docker cp workers $master_id:$HADOOP_HOME/etc/hadoop/
 
 docker exec -it $master_id /bin/bash
 
