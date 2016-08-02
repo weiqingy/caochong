@@ -6,9 +6,6 @@ SPARK_SRC_HOME=$HOME/Workspace/spark
 # The hadoop home in the docker containers
 HADOOP_HOME=/hadoop
 
-# The spark home in the docker containers
-SPARK_HOME=/spark
-
 let DISABLE_SPARK=0
 let BUILD_HADOOP=0
 let BUILD_SPARK=0
@@ -24,63 +21,65 @@ function hadoop_target() {
 }
 
 function build_hadoop() {
-    HADOOP_TARGET_SNAPSHOT=$(hadoop_target)
-    if [[ -z $HADOOP_TARGET_SNAPSHOT && $BUILD_HADOOP -eq 0 ]]; then
-        echo "No Hadoop target found, will forcefully build hadoop."
-        BUILD_HADOOP=1
-    fi
-
-    if [[ $BUILD_HADOOP -eq 1 ]]; then
+    if [[ $REBUILD -eq 1 || "$(docker images -q caochong-hadoop)" -eq "" ]]; then
         echo "Building Hadoop...."
+        #rebuild the base image if not exist
+        if [[ "$(docker images -q caochong-base)" == "" ]]; then
+            echo "Building Docker...."
+            docker build -t caochong-base .
+        fi
+
+        mkdir tmp
+
+        # Prepare hadoop packages and configuration files
         #mvn -f $HADOOP_SRC_HOME package -DskipTests -Dtar -Pdist -q || exit 1
         HADOOP_TARGET_SNAPSHOT=$(hadoop_target)
-    fi
+        cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
+        cp hadoopconf/* tmp/hadoop/etc/hadoop/
 
-    # Prepare hadoop packages and configuration files
-    cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
-    cp hadoopconf/* tmp/hadoop/etc/hadoop/
-}
-
-function build_spark() {
-    if [[ $DISABLE_SPARK -eq 0 ]]; then
-        if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 ]]; then
-            echo "Building Spark...."
-            #$SPARK_SRC_HOME/dev/make-distribution.sh --name myspark --tgz -Phive -Phive-thriftserver -Pyarn 1> /dev/null || exit 1
-        fi
-        tar xzf $SPARK_SRC_HOME/*.tgz -C tmp/
-        mv tmp/*myspark tmp/spark
-    fi
-}
-
-function build_docker() {
-    if [[ $BUILD_DOCKER -eq 1 ]]; then
-        echo "Building Docker...."
-        docker build -t hadoop-and-spark-on-docker-base .
-    fi
-
-    if [[ $BUILD_HADOOP -eq 1 || $BUILD_SPARK -eq 1 || $BUILD_DOCKER -eq 1 ]]; then
-        rm -rf tmp/ && mkdir tmp
-
-        build_hadoop
-
-        build_spark
-
-        # Generate docker file
+        # Generate docker file for hadoop
 cat > tmp/Dockerfile << EOF
-        FROM hadoop-and-spark-on-docker-base
+        FROM caochong-base
 
         ENV HADOOP_HOME $HADOOP_HOME
         ADD hadoop $HADOOP_HOME
 
-        ENV SPARK_HOME $SPARK_HOME
-        ENV HADOOP_CONF_DIR $HADOOP_HOME/etc/hadoop
-        ADD spark $SPARK_HOME
-
         RUN $HADOOP_HOME/bin/hdfs namenode -format
 EOF
+        echo "Building image for hadoop"
+        docker rmi -f caochong-hadoop
+        docker build -t caochong-hadoop tmp
 
-        docker rmi -f hadoop-and-spark-on-docker
-        docker build -t "hadoop-and-spark-on-docker" tmp
+        # Cleanup
+        rm -rf tmp
+    fi
+}
+
+function build_spark() {
+    if [[ $REBULD -eq 1 || "$(docker images -q caochong-spark)" == "" ]]; then
+        echo "Building Spark...."
+        #rebuild hadoop image if not exist
+        if [[ "$(docker images -q caochong-hadoop)" == "" ]]; then
+            build_hadoop
+        fi
+
+        mkdir tmp
+
+        $SPARK_SRC_HOME/dev/make-distribution.sh --name myspark --tgz -Phive -Phive-thriftserver -Pyarn 1> /dev/null || exit 1
+        tar xzf $SPARK_SRC_HOME/*.tgz -C tmp/
+        mv tmp/*myspark tmp/spark
+
+        # Generate docker file for hadoop
+cat > tmp/Dockerfile << EOF
+        FROM caochong-hadoop
+
+        ENV SPARK_HOME /spark
+        ENV HADOOP_CONF_DIR /hadoop/etc/hadoop
+        ADD spark \$SPARK_HOME
+EOF
+        echo "Building image for spark"
+        docker rmi -f caochong-spark
+        docker build -t caochong-spark tmp
 
         # Cleanup
         rm -rf tmp
@@ -97,17 +96,14 @@ function parse_arguments() {
                 usage
                 exit
                 ;;
-            --disable-spark)
-                DISABLE_SPARK=1
+            hadoop)
+                MODE="hadoop"
                 ;;
-            --build-hadoop)
-                BUILD_HADOOP=1
+            spark)
+                MODE="spark"
                 ;;
-            --build-spark)
-                BUILD_SPARK=1
-                ;;
-            --build-docker)
-                BUILD_DOCKER=1
+            --rebuild)
+                REBUILD=1
                 ;;
             *)
                 echo "ERROR: unknown parameter \"$PARAM\""
@@ -118,22 +114,21 @@ function parse_arguments() {
         shift
     done
 
-    if [[ $DISABLE_SPARK -eq 1 ]]; then
-        if [[ $BUILD_SPARK -eq 1 ]]; then
-            echo "Options --disable-spark and --build-spark are mutually exclusive"
-            exit 2
-        elif [[ $BUILD_DOCKER -eq 0 ]]; then
-            echo "Option --disable-spark needs to work with --build-docker"
-            exit 3
-        fi
+    if [[ "$MODE" == "" ]]; then
+        echo "Must specify either hadoop or spark mode"
+        exit 2
     fi
 }
 
 parse_arguments $@
 
-build_docker
+if [[ "$MODE" == "hadoop" ]]; then
+    build_hadoop
+elif [[ "$MODE" == "spark" ]]; then
+    build_spark
+fi
 
-docker network create hadoop-and-spark-on-docker 2> /dev/null
+docker network create caochong 2> /dev/null
 
 let N=3
 
@@ -141,11 +136,11 @@ let N=3
 docker rm -f $(docker ps -a -q -f "name=master")
 
 # launch master container
-master_id=$(docker run -d --net hadoop-and-spark-on-docker --name master hadoop-and-spark-on-docker)
+master_id=$(docker run -d --net caochong --name master caochong-$MODE)
 echo ${master_id:0:12} > workers
 for i in $(seq $((N-1)));
 do
-    container_id=$(docker run -d --net hadoop-and-spark-on-docker hadoop-and-spark-on-docker)
+    container_id=$(docker run -d --net caochong caochong-$MODE)
     echo ${container_id:0:12} >> workers
 done
 
