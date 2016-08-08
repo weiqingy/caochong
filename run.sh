@@ -12,7 +12,11 @@ let BUILD_SPARK=0
 let BUILD_DOCKER=0
 
 function usage() {
-    echo "Usage"
+    echo "usage: ./run.sh [--help] [hadoop] [spark] [rebuild]\n
+          help     Show usage information\n
+          hadoop   Make running mode to hadoop\n
+          spark    Make running mode to spark\n
+          rebuild  If current mode is hadoop, rebuild hadoop; If current mode is spark, rebuild spark"
 }
 
 # @Return the hadoop distribution package for deployment
