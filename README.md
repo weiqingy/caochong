@@ -17,13 +17,13 @@ The distributed cluster in Docker containers outperforms its counterparts:
 1. _Managing a cluster of vbox/vmware virtual machines_, nice try. But let's see who runs faster.
 
 ## Usage
-**./run.sh --help**   Show usage information
+**./run.sh --help**       Show usage information
 
-**./run.sh hadoop**   Make running mode to hadoop
+**./run.sh hadoop**       Make running mode to hadoop
 
-**./run.sh spark**    Make running mode to spark
+**./run.sh spark**        Make running mode to spark
 
-**./run.sh rebuild**  If current mode is hadoop, rebuild hadoop; If current mode is spark, rebuild spark
+**./run.sh rebuild**      If current mode is hadoop, rebuild hadoop; If current mode is spark, rebuild spark
 
 ## License
 Unlike all other Apache projects which use Apache license, this project uses an advanced and modern license named The Star And Thank Author License (SATA). Please see the [LICENSE](LICENSE) file for more information.
