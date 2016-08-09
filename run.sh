@@ -10,13 +10,15 @@ let DISABLE_SPARK=0
 let BUILD_HADOOP=0
 let BUILD_SPARK=0
 let BUILD_DOCKER=0
+let N=3
 
 function usage() {
-    echo "Usage: ./run.sh hadoop|spark [--rebuild]"
+    echo "Usage: ./run.sh hadoop|spark [--rebuild] [--nodes=N]"
     echo
     echo "hadoop       Make running mode to hadoop"
     echo "spark        Make running mode to spark"
     echo "--rebuild    Rebuild hadoop if in hadoop mode; else reuild spark"
+    echo "--nodes      Specify the number of total nodes"
 }
 
 # @Return the hadoop distribution package for deployment
@@ -109,6 +111,9 @@ function parse_arguments() {
             --rebuild)
                 REBUILD=1
                 ;;
+            --nodes)
+                N=$VALUE
+                ;;
             *)
                 echo "ERROR: unknown parameter \"$PARAM\""
                 usage
@@ -133,8 +138,6 @@ elif [[ "$MODE" == "spark" ]]; then
 fi
 
 docker network create caochong 2> /dev/null
-
-let N=3
 
 # remove the outdated master
 docker rm -f $(docker ps -a -q -f "name=master")

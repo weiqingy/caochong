@@ -25,6 +25,7 @@ Usage: ./run.sh hadoop|spark [--rebuild]
 hadoop       Make running mode to hadoop
 spark        Make running mode to spark
 --rebuild    Rebuild hadoop if in hadoop mode; else reuild spark
+--nodes      Specify the number of total nodes
 ```
 
 **./run.sh rebuild**      If current mode is hadoop, rebuild hadoop; If current mode is spark, rebuild spark
