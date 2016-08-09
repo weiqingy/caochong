@@ -17,11 +17,15 @@ The distributed cluster in Docker containers outperforms its counterparts:
 1. _Managing a cluster of vbox/vmware virtual machines_, nice try. But let's see who runs faster.
 
 ## Usage
-**./run.sh --help**       Show usage information
 
-**./run.sh hadoop**       Make running mode to hadoop
+```
+$ ./run.sh --help
+Usage: ./run.sh hadoop|spark [--rebuild]
 
-**./run.sh spark**        Make running mode to spark
+hadoop       Make running mode to hadoop
+spark        Make running mode to spark
+--rebuild    Rebuild hadoop if in hadoop mode; else reuild spark
+```
 
 **./run.sh rebuild**      If current mode is hadoop, rebuild hadoop; If current mode is spark, rebuild spark
 
