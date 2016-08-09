@@ -20,7 +20,7 @@ The distributed cluster in Docker containers outperforms its counterparts:
 
 ```
 $ ./run.sh --help
-Usage: ./run.sh hadoop|spark [--rebuild]
+Usage: ./run.sh hadoop|spark [--rebuild] [--nodes=N]
 
 hadoop       Make running mode to hadoop
 spark        Make running mode to spark
