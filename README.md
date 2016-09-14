@@ -28,7 +28,5 @@ spark        Make running mode to spark
 --nodes      Specify the number of total nodes
 ```
 
-**./run.sh rebuild**      If current mode is hadoop, rebuild hadoop; If current mode is spark, rebuild spark
-
 ## License
 Unlike all other Apache projects which use Apache license, this project uses an advanced and modern license named The Star And Thank Author License (SATA). Please see the [LICENSE](LICENSE) file for more information.
