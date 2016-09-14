@@ -24,7 +24,7 @@ RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -P '' && \
 
 # set supervisor
 RUN apt-get install -y supervisor
-ADD supervisor/sshd.conf /etc/supervisor/conf.d/sshd.conf
+RUN echo -e "[program:sshd]\ncommand=/usr/sbin/sshd -D" >> /etc/supervisor/supervisord.conf
 
 # install general tools
 RUN apt-get install -y iproute2 vim inetutils-ping

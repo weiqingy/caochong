@@ -38,7 +38,7 @@ function build_hadoop() {
         mkdir tmp
 
         # Prepare hadoop packages and configuration files
-        #mvn -f $HADOOP_SRC_HOME package -DskipTests -Dtar -Pdist -q || exit 1
+        mvn -f $HADOOP_SRC_HOME package -DskipTests -Dtar -Pdist -q || exit 1
         HADOOP_TARGET_SNAPSHOT=$(hadoop_target)
         cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
         cp hadoopconf/* tmp/hadoop/etc/hadoop/
@@ -140,19 +140,19 @@ fi
 docker network create caochong 2> /dev/null
 
 # remove the outdated master
-docker rm -f $(docker ps -a -q -f "name=master")
+docker rm -f $(docker ps -a -q -f "name=master") 2>&1 > /dev/null
 
 # launch master container
 master_id=$(docker run -d --net caochong --name master caochong-$MODE)
-echo ${master_id:0:12} > workers
+echo ${master_id:0:12} > hosts
 for i in $(seq $((N-1)));
 do
     container_id=$(docker run -d --net caochong caochong-$MODE)
-    echo ${container_id:0:12} >> workers
+    echo ${container_id:0:12} >> hosts
 done
 
 # Copy the workers file to the master container
-docker cp workers $master_id:$HADOOP_HOME/etc/hadoop/
+docker cp hosts $master_id:$HADOOP_HOME/etc/hadoop/workers
 
 # Start hdfs and yarn services
 docker exec -it $master_id $HADOOP_HOME/sbin/start-dfs.sh
