@@ -4,7 +4,7 @@ MAINTAINER Mingliang Liu <mliu@hortonworks.com>
 
 RUN yum install -y epel-release
 RUN yum -y update
-RUN yum install wget ntp -y
+RUN yum install -y wget ntp sudo
 
 # configure ssh free key access
 RUN yum install -y which openssh-clients openssh-server
