@@ -3,14 +3,10 @@
 HADOOP_SRC_HOME=$HOME/Workspace/hadoop
 SPARK_SRC_HOME=$HOME/Workspace/spark
 
+let N=3
+
 # The hadoop home in the docker containers
 HADOOP_HOME=/hadoop
-
-let DISABLE_SPARK=0
-let BUILD_HADOOP=0
-let BUILD_SPARK=0
-let BUILD_DOCKER=0
-let N=3
 
 function usage() {
     echo "Usage: ./run.sh hadoop|spark [--rebuild] [--nodes=N]"
@@ -27,7 +23,7 @@ function hadoop_target() {
 }
 
 function build_hadoop() {
-    if [[ $REBUILD -eq 1 || "$(docker images -q caochong-hadoop)" -eq "" ]]; then
+    if [[ $REBUILD -eq 1 || "$(docker images -q caochong-hadoop)" == "" ]]; then
         echo "Building Hadoop...."
         #rebuild the base image if not exist
         if [[ "$(docker images -q caochong-base)" == "" ]]; then
@@ -140,7 +136,7 @@ fi
 docker network create caochong 2> /dev/null
 
 # remove the outdated master
-docker rm -f $(docker ps -a -q -f "name=master") 2>&1 > /dev/null
+docker rm -f $(docker ps -a -q -f "name=caochong-$MODE") 2>&1 > /dev/null
 
 # launch master container
 master_id=$(docker run -d --net caochong --name master caochong-$MODE)
