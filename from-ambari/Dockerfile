@@ -19,7 +19,16 @@ RUN mkdir /etc/supervisor.d/
 RUN echo -e "[program:sshd]\ncommand=/sbin/service sshd start" >> /etc/supervisord.conf
 RUN echo -e "[program:ntpd]\ncommand=/sbin/service ntpd start" >> /etc/supervisord.conf
 
+# There are several available versions of Ambari
+# to test the branch-2.4 build - updated on every commit to branch-2.4 (under development)
+# RUN wget -O /etc/yum.repos.d/ambari.repo http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/latest/2.4.0.0/ambaribn.repo
+
+# to test the trunk build - updated on every commit to trunk
+# RUN wget -O /etc/yum.repos.d/ambari.repo http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/latest/trunk/ambaribn.repo
+
+# to test public release 2.2.2
 RUN wget -O /etc/yum.repos.d/ambari.repo http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.2.2.0/ambari.repo
+
 RUN yum install ambari-server -y
 RUN ambari-server setup -s
 
