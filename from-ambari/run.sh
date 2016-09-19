@@ -3,6 +3,37 @@
 NODE_NAME_PREFIX="caochong-ambari"
 let N=3
 
+function usage() {
+    echo "Usage: ./run.sh [--nodes=N]"
+    echo
+    echo "--nodes      Specify the number of total nodes"
+}
+
+# Parse and validate the command line arguments
+function parse_arguments() {
+    while [ "$1" != "" ]; do
+        PARAM=`echo $1 | awk -F= '{print $1}'`
+        VALUE=`echo $1 | awk -F= '{print $2}'`
+        case $PARAM in
+            -h | --help)
+                usage
+                exit
+                ;;
+            --nodes)
+                N=$VALUE
+                ;;
+            *)
+                echo "ERROR: unknown parameter \"$PARAM\""
+                usage
+                exit 1
+                ;;
+        esac
+        shift
+    done
+}
+
+parse_arguments $@
+
 docker build -t caochong-ambari .
 docker network create caochong 2> /dev/null
 
