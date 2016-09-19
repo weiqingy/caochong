@@ -17,37 +17,7 @@ The distributed cluster in Docker containers outperforms its counterparts:
 1. _[building Ambari cluster using vbox/vmware virtual machines](https://cwiki.apache.org/confluence/display/AMBARI/Quick+Start+Guide)_, nice try. But let's see who runs faster.
 
 ## Usage
-The following illustrates the basic procedure on how to use this tool. It provides two ways to set up Hadoop and Spark cluster:
-**from-ambari** and **from-source**.
-### From Ambari
-
-[Apache Ambari](https://cwiki.apache.org/confluence/display/AMBARI/Ambari) is a tool for provisioning, managing, and monitoring Apache Hadoop clusters. If using Ambari to set up Hadoop and Spark, Spark will run in Yarn client/cluster mode.
-
-First, run from-ambari/run.sh to set up Ambari cluster.
-```
-$ ./run.sh --help
-Usage: ./run.sh [--rebuild] [--nodes=N]
-
---nodes      Specify the number of total nodes
---port       Specify the port of your local machine to access Ambari Web UI (8080 - 8088)
-```
-There are three repository files which can be used to install Ambari. Please go to from-ambari/Dockerfile and select/uncomment the version you wanted.
-
-After running run.sh script successfully, Ambari Server will be started. Hit localhost:port from your browser on your local computer. The port is the parameter specified in the command line of running run.sh. By default,
-it is 8080. Note that Ambari Server can take some time to fully come up and ready to accept connections. Keep hitting the URL until you get the login page.
-
-Once you are at the login page, login with the default username admin and password admin.
-On the Install Options page, use the hostnames showing in your terminal as the Fully Qualified Domain Name (FQDN). For example:
-```
-Using the following hostnames:
-------------------------------
-85f9417e3d94
-b5077ffd9f7f
-------------------------------
-```
-Upload from-ambari/id_rsa as your SSH Private Key to automatically register hosts.
-
-Then, follow the onscreen instructions to install Hadoop (YARN + MapReduce2, HDFS) and Spark.
+The following illustrates the basic procedure on how to use this tool. It provides two ways to set up Hadoop and Spark cluster: **from-ambari** and **from-source**.
 
 ### From Source
 The only one step is to run from-source/run.sh.
@@ -61,6 +31,37 @@ spark        Make running mode to spark
 --rebuild    Rebuild hadoop if in hadoop mode; else reuild spark
 --nodes      Specify the number of total nodes
 ```
+
+### From Ambari
+
+[Apache Ambari](https://cwiki.apache.org/confluence/display/AMBARI/Ambari) is a tool for provisioning, managing, and monitoring Apache Hadoop clusters. If using Ambari to set up Hadoop and Spark, Spark will run in Yarn client/cluster mode.
+
+1. Choose Ambari version in `from-ambari/Dockerfile` file (default Ambari 2.2)
+2. Run `from-ambari/run.sh` to set up an Ambari cluster and launch it
+
+	```
+	$ ./run.sh --help
+	Usage: ./run.sh [--rebuild] [--nodes=N]
+	
+	--nodes      Specify the number of total nodes
+	--port       Specify the port of your local machine to access Ambari Web UI (8080 - 8088)
+	```
+	
+3. Hit `http://localhost:port` from your browser on your local computer. The _port_ is the parameter specified in the command line of running `run.sh`. By default, it is [http://localhost:8080](http://localhost:8080). NOTE: Ambari Server can take some time to fully come up and ready to accept connections. Keep hitting the URL until you get the login page.
+4. Login the Ambari webpage with the default username:password is `admin:admin`.
+5. On the _Install Options_ page, use the hostnames reported by `run.sh` as the Fully Qualified Domain Name (FQDN). For example:
+
+	```
+	Using the following hostnames:
+	------------------------------
+	85f9417e3d94
+	b5077ffd9f7f
+	------------------------------
+	```
+	
+6. Upload `from-ambari/id_rsa` as your SSH Private Key to automatically register hosts when asked.
+7. Follow the onscreen instructions to install Hadoop (YARN + MapReduce2, HDFS) and Spark.
+8. Log in to any of the nodes and you're all set to use an Ambari cluster!
 
 ## License
 Unlike all other Apache projects which use Apache license, this project uses an advanced and modern license named The Star And Thank Author License (SATA). Please see the [LICENSE](LICENSE) file for more information.
