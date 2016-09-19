@@ -41,7 +41,7 @@ spark        Make running mode to spark
 
 	```
 	$ ./run.sh --help
-	Usage: ./run.sh [--rebuild] [--nodes=N]
+	Usage: ./run.sh [--nodes=N] [--port=P]
 	
 	--nodes      Specify the number of total nodes
 	--port       Specify the port of your local machine to access Ambari Web UI (8080 - 8088)
