@@ -2,11 +2,13 @@
 
 NODE_NAME_PREFIX="caochong-ambari"
 let N=3
+let PORT=8080
 
 function usage() {
     echo "Usage: ./run.sh [--nodes=N]"
     echo
     echo "--nodes      Specify the number of total nodes"
+    echo "--port       Specify the port of your local machine to access Ambari Web UI (8080 - 8088)"
 }
 
 # Parse and validate the command line arguments
@@ -18,6 +20,9 @@ function parse_arguments() {
             -h | --help)
                 usage
                 exit
+                ;;
+            --port)
+                PORT=$VALUE
                 ;;
             --nodes)
                 N=$VALUE
@@ -41,7 +46,7 @@ docker network create caochong 2> /dev/null
 docker rm -f $(docker ps -a -q -f "name=$NODE_NAME_PREFIX") 2>&1 > /dev/null
 
 # launch containers
-master_id=$(docker run -d --net caochong -p 8080:8080 --name $NODE_NAME_PREFIX-0 caochong-ambari)
+master_id=$(docker run -d --net caochong -p $PORT:8080 --name $NODE_NAME_PREFIX-0 caochong-ambari)
 echo ${master_id:0:12} > hosts
 for i in $(seq $((N-1)));
 do

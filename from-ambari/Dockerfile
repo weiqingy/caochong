@@ -25,6 +25,6 @@ RUN ambari-server setup -s
 
 RUN yum clean all
 
-EXPOSE 22 8080
+EXPOSE 22 8080 8081 8082 8083 8084 8085 8086 8087 8088
 
 CMD /usr/bin/supervisord -n
