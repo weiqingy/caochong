@@ -29,6 +29,8 @@ RUN echo -e "[program:sshd]\ncommand=/usr/sbin/sshd -D" >> /etc/supervisor/super
 # install general tools
 RUN apt-get install -y iproute2 vim inetutils-ping
 
+RUN apt-get clean
+
 EXPOSE 22 9000 50020 50030
 
 CMD /usr/bin/supervisord -n
