@@ -36,20 +36,21 @@ spark        Make running mode to spark
 
 [Apache Ambari](https://cwiki.apache.org/confluence/display/AMBARI/Ambari) is a tool for provisioning, managing, and monitoring Apache Hadoop clusters. If using Ambari to set up Hadoop and Spark, Spark will run in Yarn client/cluster mode.
 
-1. Choose Ambari version in `from-ambari/Dockerfile` file (default Ambari 2.2)
-2. Run `from-ambari/run.sh` to set up an Ambari cluster and launch it
+1. [Optional] Choose Ambari version in `from-ambari/Dockerfile` file (default Ambari 2.2)
+1. Run `from-ambari/run.sh` to set up an Ambari cluster and launch it
 
 	```
 	$ ./run.sh --help
-	Usage: ./run.sh [--nodes=N] [--port=P]
+	Usage: ./run.sh [--nodes=3] [--port=8080]
 	
 	--nodes      Specify the number of total nodes
 	--port       Specify the port of your local machine to access Ambari Web UI (8080 - 8088)
 	```
 	
-3. Hit `http://localhost:port` from your browser on your local computer. The _port_ is the parameter specified in the command line of running `run.sh`. By default, it is [http://localhost:8080](http://localhost:8080). NOTE: Ambari Server can take some time to fully come up and ready to accept connections. Keep hitting the URL until you get the login page.
-4. Login the Ambari webpage with the default username:password is `admin:admin`.
-5. On the _Install Options_ page, use the hostnames reported by `run.sh` as the Fully Qualified Domain Name (FQDN). For example:
+1. Hit `http://localhost:port` from your browser on your local computer. The _port_ is the parameter specified in the command line of running `run.sh`. By default, it is [http://localhost:8080](http://localhost:8080). NOTE: Ambari Server can take some time to fully come up and ready to accept connections. Keep hitting the URL until you get the login page.
+1. Login the Ambari webpage with the default username:password is `admin:admin`.
+1. [Optional] Customize the repository Base URLs in the Select Stack step.
+1. On the _Install Options_ page, use the hostnames reported by `run.sh` as the Fully Qualified Domain Name (FQDN). For example:
 
 	```
 	Using the following hostnames:
@@ -59,9 +60,14 @@ spark        Make running mode to spark
 	------------------------------
 	```
 	
-6. Upload `from-ambari/id_rsa` as your SSH Private Key to automatically register hosts when asked.
-7. Follow the onscreen instructions to install Hadoop (YARN + MapReduce2, HDFS) and Spark.
-8. Log in to any of the nodes and you're all set to use an Ambari cluster!
+1. Upload `from-ambari/id_rsa` as your SSH Private Key to automatically register hosts when asked.
+1. Follow the onscreen instructions to install Hadoop (YARN + MapReduce2, HDFS) and Spark.
+1. [Optional] Log in to any of the nodes and you're all set to use an Ambari cluster!
+
+	```
+	# login to your Ambari server node
+	$ docker exec -it caochong-ambari-0 /bin/bash
+	```
 
 ## License
 Unlike all other Apache projects which use Apache license, this project uses an advanced and modern license named The Star And Thank Author License (SATA). Please see the [LICENSE](LICENSE) file for more information.
