@@ -45,6 +45,7 @@ cat > tmp/Dockerfile << EOF
 
         ENV HADOOP_HOME $HADOOP_HOME
         ADD hadoop $HADOOP_HOME
+        ENV PATH "\$PATH:$HADOOP_HOME/path"
 
         RUN $HADOOP_HOME/bin/hdfs namenode -format
 EOF
@@ -78,6 +79,7 @@ cat > tmp/Dockerfile << EOF
         ENV SPARK_HOME /spark
         ENV HADOOP_CONF_DIR /hadoop/etc/hadoop
         ADD spark \$SPARK_HOME
+        ENV PATH "\$PATH:\$SPARK_HOME/path"
 EOF
         echo "Building image for spark"
         docker rmi -f caochong-spark
