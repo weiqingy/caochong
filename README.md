@@ -41,10 +41,11 @@ spark        Make running mode to spark
 
 	```
 	$ ./run.sh --help
-	Usage: ./run.sh [--nodes=3] [--port=8080]
+	Usage: ./run.sh [--nodes=3] [--port=8080] --secure
 	
 	--nodes      Specify the number of total nodes
 	--port       Specify the port of your local machine to access Ambari Web UI (8080 - 8088)
+	--secure     Specify the cluster to be secure
 	```
 	
 1. Hit `http://localhost:port` from your browser on your local computer. The _port_ is the parameter specified in the command line of running `run.sh`. By default, it is [http://localhost:8080](http://localhost:8080). NOTE: Ambari Server can take some time to fully come up and ready to accept connections. Keep hitting the URL until you get the login page.
@@ -68,6 +69,8 @@ spark        Make running mode to spark
 	# login to your Ambari server node
 	$ docker exec -it caochong-ambari-0 /bin/bash
 	```
+1. [Optional] If you want to make the cluster secure, you need to login to your Ambari server node, and run install_Kerberos.sh (you may need to do "chmod 777 install_Kerberos.sh").
+Then go back to Ambari web page, follow the onscreen instructions to configure Kerberos.
 
 ## License
 Unlike all other Apache projects which use Apache license, this project uses an advanced and modern license named The Star And Thank Author License (SATA). Please see the [LICENSE](LICENSE) file for more information.
