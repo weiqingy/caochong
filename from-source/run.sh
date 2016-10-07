@@ -138,10 +138,10 @@ fi
 docker network create caochong 2> /dev/null
 
 # remove the outdated master
-docker rm -f $(docker ps -a -q -f "name=caochong-$MODE") 2>&1 > /dev/null
+docker rm -f $(docker ps -a -q -f "name=caochong") 2>&1 > /dev/null
 
 # launch master container
-master_id=$(docker run -d --net caochong --name master caochong-$MODE)
+master_id=$(docker run -d --net caochong --name caochong-master caochong-$MODE)
 echo ${master_id:0:12} > hosts
 for i in $(seq $((N-1)));
 do
@@ -157,4 +157,4 @@ docker exec -it $master_id $HADOOP_HOME/sbin/start-dfs.sh
 docker exec -it $master_id $HADOOP_HOME/sbin/start-yarn.sh
 
 # Connect to the master node
-docker exec -it master /bin/bash
+docker exec -it caochong-master /bin/bash
