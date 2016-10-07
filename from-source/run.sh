@@ -45,7 +45,7 @@ cat > tmp/Dockerfile << EOF
 
         ENV HADOOP_HOME $HADOOP_HOME
         ADD hadoop $HADOOP_HOME
-        ENV PATH "\$PATH:$HADOOP_HOME/path"
+        ENV PATH "\$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin"
 
         RUN $HADOOP_HOME/bin/hdfs namenode -format
 EOF
