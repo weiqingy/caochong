@@ -71,7 +71,8 @@ echo "------------------------------"
 echo "Copying back the private key..."
 docker cp $master_id:/root/.ssh/id_rsa .
 
-if s == 1; then
+# the following functionality (run in secure mode) is IN PROGRESS
+if [ $S -eq 1 ]; then
     echo '
 #!/bin/sh
 
