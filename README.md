@@ -71,6 +71,3 @@ spark        Make running mode to spark
 	```
 1. [Optional] If you want to make the cluster secure, you need to login to your Ambari server node, and run install_Kerberos.sh (you may need to do "chmod 777 install_Kerberos.sh").
 Then go back to Ambari web page, follow the onscreen instructions to configure Kerberos.
-
-## License
-Unlike all other Apache projects which use Apache license, this project uses an advanced and modern license named The Star And Thank Author License (SATA). Please see the [LICENSE](LICENSE) file for more information.
