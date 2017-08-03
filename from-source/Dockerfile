@@ -16,11 +16,12 @@ ENV PATH $PATH:$JAVA_HOME/bin
 # install and configure ssh service
 RUN apt-get install -y openssh-server
 RUN echo 'root:hortonworks' | chpasswd
-RUN mkdir /var/run/sshd && \
-    sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 # configure ssh free key access
-RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -P '' && \
-    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -N "" \
+ && cat /root/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys \
+ && echo "HashKnownHosts no" >> ~/.ssh/config \
+ && echo "StrictHostKeyChecking no" ~/.ssh/config \
+ && mkdir -p /var/run/sshd
 
 # set supervisor
 RUN apt-get install -y supervisor
