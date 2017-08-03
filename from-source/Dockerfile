@@ -2,7 +2,7 @@
 
 FROM ubuntu:latest
 
-MAINTAINER Mingliang Liu <mliu@hortonworks.com>
+MAINTAINER Mingliang Liu <liuml07@apache.org>
 MAINTAINER Weiqing Yang <wyang@hortonworks.com>
 
 RUN apt-get update -y
@@ -14,18 +14,19 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 ENV PATH $PATH:$JAVA_HOME/bin
 
 # install and configure ssh service
-RUN apt-get install -y openssh-server
-RUN echo 'root:hortonworks' | chpasswd
+RUN apt-get install -y openssh-server \
+    && mkdir -p /var/run/sshd
 # configure ssh free key access
+RUN echo 'root:hortonworks' | chpasswd
 RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -N "" \
- && cat /root/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys \
- && echo "HashKnownHosts no" >> ~/.ssh/config \
- && echo "StrictHostKeyChecking no" ~/.ssh/config \
- && mkdir -p /var/run/sshd
+    && cat /root/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys \
+    && echo "HashKnownHosts no" >> ~/.ssh/config \
+    && echo "StrictHostKeyChecking no" >> ~/.ssh/config
 
 # set supervisor
 RUN apt-get install -y supervisor
-RUN echo -e "[program:sshd]\ncommand=/usr/sbin/sshd -D" >> /etc/supervisor/supervisord.conf
+RUN echo "[program:sshd]" >> /etc/supervisor/supervisord.conf \
+    && echo "command=/usr/sbin/sshd -D" >> /etc/supervisor/supervisord.conf
 
 # install general tools
 RUN apt-get install -y iproute2 vim inetutils-ping
