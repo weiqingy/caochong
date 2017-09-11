@@ -2,26 +2,38 @@
 <configuration>
     <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>master</value>
+        <value>caochong-master</value>
     </property>
      <property>
          <name>yarn.resourcemanager.resource-tracker.address</name>
-         <value>master:8025</value>
+         <value>caochong-master:8025</value>
     </property>
     <property>
          <name>yarn.resourcemanager.scheduler.address</name>
-         <value>master:8030</value>
+         <value>caochong-master:8030</value>
     </property>
     <property>
         <name>yarn.resourcemanager.address</name>
-        <value>master:8040</value>
+        <value>caochong-master:8040</value>
     </property>
     <property>
         <name>yarn.nodemanager.address</name>
-        <value>master:8050</value>
+        <value>caochong-master:8050</value>
     </property>
     <property>
         <name>yarn.nodemanager.localizer.address</name>
-        <value>master:8060</value>
+        <value>caochong-master:8060</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.vmem-check-enabled</name>
+        <value>false</value>
     </property>
 </configuration>
