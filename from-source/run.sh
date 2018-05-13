@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-HADOOP_SRC_HOME=$HOME/Workspace/hadoop
+HADOOP_SRC_HOME=$HOME/Downloads/hadoop-2.8.4-src
 SPARK_SRC_HOME=$HOME/Workspace/spark
 
 let N=3
@@ -19,7 +19,7 @@ function usage() {
 
 # @Return the hadoop distribution package for deployment
 function hadoop_target() {
-    echo $(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-*-SNAPSHOT')
+    echo $(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-2.8.4')
 }
 
 function build_hadoop() {
