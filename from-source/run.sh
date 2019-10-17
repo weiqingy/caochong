@@ -31,10 +31,14 @@ function build_hadoop() {
             docker build -t caochong-base .
         fi
 
-        mkdir tmp
-
         # Prepare hadoop packages and configuration files
-        mvn -f $HADOOP_SRC_HOME package -DskipTests -Dtar -Pdist -q || exit 1
+        cd $HADOOP_SRC_HOME
+        mvn clean
+        git clean -f -d
+        mvn package -DskipTests -Dtar -Pdist -q || exit 1
+        cd -
+
+        mkdir tmp
         HADOOP_TARGET_SNAPSHOT=$(hadoop_target)
         cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
         cp hadoopconf/* tmp/hadoop/etc/hadoop/
