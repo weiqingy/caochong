@@ -1,20 +1,24 @@
 #!/usr/bin/env bash
 
-HADOOP_SRC_HOME=$HOME/Workspace/hadoop
-SPARK_SRC_HOME=$HOME/Workspace/spark
+HADOOP_SRC_HOME=${HADOOP_SRC_HOME:-$HOME/Workspace/hadoop}
+HBASE_SRC_HOME=${HBASE_SRC_HOME:-$HOME/Workspace/hbase}
+SPARK_SRC_HOME=${SPARK_SRC_HOME:-$HOME/Workspace/spark}
 
 let N=3
 
 # The hadoop home in the docker containers
 HADOOP_HOME=/hadoop
+# The hbase home in the docker containers
+HBASE_HOME=/hbase
 
 function usage() {
-    echo "Usage: ./run.sh hadoop|spark [--rebuild] [--nodes=N]"
+    echo "Usage: ./run.sh hadoop|hbase|spark [--rebuild] [--nodes=N]"
     echo
-    echo "hadoop       Make running mode to hadoop"
-    echo "spark        Make running mode to spark"
-    echo "--rebuild    Rebuild hadoop if in hadoop mode; else reuild spark"
-    echo "--nodes      Specify the number of total nodes"
+    echo "hadoop       Make running mode be hadoop"
+    echo "hbase        Make running mode be hbase"
+    echo "spark        Make running mode be spark"
+    echo "--rebuild    Rebuild hadoop if in hadoop mode, rebuild hbase in hbase mode, else reuild spark"
+    echo "--nodes      Specify the number of total nodes (default 3)"
 }
 
 # @Return the hadoop distribution package for deployment
@@ -38,7 +42,7 @@ function build_hadoop() {
         mvn package -DskipTests -Dtar -Pdist -q || exit 1
         cd -
 
-        mkdir tmp
+        mkdir -p tmp
         HADOOP_TARGET_SNAPSHOT=$(hadoop_target)
         cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
         cp hadoopconf/* tmp/hadoop/etc/hadoop/
@@ -59,6 +63,53 @@ EOF
 
         # Cleanup
         rm -rf tmp
+    fi
+}
+
+# @Return the hbase distribution package for deployment
+function hbase_target() {
+    echo $(find $HBASE_SRC_HOME/hbase-assembly/target/ -type d -name 'hbase-*-SNAPSHOT-bin.tar.gz')
+}
+
+function build_hbase() {
+    # Build Hadoop first since we use that as base image
+    if [[ "$(docker images -q caochong-hadoop)" == "" ]]; then
+        build_hadoop
+    fi
+
+    if [[ $REBUILD -eq 1 || "$(docker images -q caochong-hbase)" == "" ]]; then
+        echo "Building HBase...."
+        #rebuild the base image if not exist
+        if [[ "$(docker images -q caochong-base)" == "" ]]; then
+            echo "Building Docker...."
+            docker build -t caochong-base .
+        fi
+
+        # Prepare hadoop packages and configuration files
+        cd $HBASE_SRC_HOME
+        git clean -f -d
+        mvn clean install -DskipTests && mvn -DskipTests package assembly:single
+        cd -
+
+        mkdir -p tmp
+        tar -xf $(hadoop_target) -C tmp
+        mv tmp/hbase* tmp/hbase
+        cp hadoopconf/* tmp/hbase/conf/
+
+        # Generate docker file for hadoop
+cat > tmp/Dockerfile << EOF
+        FROM caochong-hadoop
+
+        ENV HBASE_HOME $HBASE_HOME
+        ADD hbase $HBASE_HOME
+        ENV PATH "\$PATH:$HBASE_HOME/bin:$HBASE_HOME/sbin"
+EOF
+        echo "Building image for hbase"
+        docker rmi -f caochong-hbase
+        docker build -t caochong-hbase tmp
+
+        # Cleanup
+        rm -rf tmp/
     fi
 }
 
@@ -107,6 +158,9 @@ function parse_arguments() {
             hadoop)
                 MODE="hadoop"
                 ;;
+            hbase)
+                MODE="hbase"
+                ;;
             spark)
                 MODE="spark"
                 ;;
@@ -133,11 +187,17 @@ function parse_arguments() {
 
 parse_arguments $@
 
-if [[ "$MODE" == "hadoop" ]]; then
-    build_hadoop
-elif [[ "$MODE" == "spark" ]]; then
-    build_spark
-fi
+case $MODE in
+    hadoop)
+        build_hadoop
+        ;;
+    hbase)
+        build_hbase
+        ;;
+    spark)
+        build_spark
+        ;;
+esac
 
 docker network create caochong 2> /dev/null
 
@@ -163,6 +223,14 @@ docker cp hosts $master_id:$HADOOP_HOME/etc/hadoop/slaves
 # Start hdfs and yarn services
 docker exec -it $master_id $HADOOP_HOME/sbin/start-dfs.sh
 docker exec -it $master_id $HADOOP_HOME/sbin/start-yarn.sh
+
+if [[ "$MODE" == "hbase" ]]; then
+    docker cp hosts $master_id:$HBASE_HOME/conf/regionservers
+    tail -1 hosts >> backup-masters
+    docker cp backup-masters $master_id:$HBASE_HOME/conf/backup-masters
+
+    docker exec -it $master_id $HBASE_HOME/bin/start-hbase.sh
+fi
 
 # Connect to the master node
 docker exec -it caochong-master /bin/bash
