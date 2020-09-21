@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 HADOOP_SRC_HOME=$HOME/Workspace/hadoop
+# File pointing to a hadoop-${version}.tar.gz binary file. If provided, it uses this Hadoop binary
+# instead of building from source in $HADOOP_SRC_HOME
+HADOOP_BINARY_FILE=
 SPARK_SRC_HOME=$HOME/Workspace/spark
 
 let N=3
@@ -17,9 +20,19 @@ function usage() {
     echo "--nodes      Specify the number of total nodes"
 }
 
-# @Return the hadoop distribution package for deployment
+# @Return the hadoop package directory for deployment
 function hadoop_target() {
-    echo $(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-*-SNAPSHOT')
+    if [ -z "$HADOOP_BINARY_FILE" ]; then
+        cd $HADOOP_SRC_HOME
+        git clean -f -d
+        mvn package -DskipTests -Dtar -Pdist -q || exit 1
+        cd -
+        echo $(find $HADOOP_SRC_HOME/hadoop-dist/target/ -type d -name 'hadoop-*-SNAPSHOT')
+    else
+        tmp_dir=$(mktemp -d -t caochong-hadoop-build-XXXX)
+        tar xf $HADOOP_BINARY_FILE -C $tmp_dir
+        echo $tmp_dir/hadoop-*
+    fi
 }
 
 function build_hadoop() {
@@ -32,15 +45,8 @@ function build_hadoop() {
         fi
 
         # Prepare hadoop packages and configuration files
-        cd $HADOOP_SRC_HOME
-        mvn clean
-        git clean -f -d
-        mvn package -DskipTests -Dtar -Pdist -q || exit 1
-        cd -
-
-        mkdir tmp
-        HADOOP_TARGET_SNAPSHOT=$(hadoop_target)
-        cp -r $HADOOP_TARGET_SNAPSHOT tmp/hadoop
+        mkdir -p tmp
+        cp -r $(hadoop_target) tmp/hadoop
         cp hadoopconf/* tmp/hadoop/etc/hadoop/
 
         # Generate docker file for hadoop
@@ -141,7 +147,7 @@ fi
 
 docker network create caochong 2> /dev/null
 
-# remove the outdated master
+# remove the outdated containers
 for d in $(docker ps -a -q -f "label=caochong")
 do
     docker rm -f $d 2>&1 > /dev/null
@@ -152,7 +158,7 @@ master_id=$(docker run -d --net caochong --name caochong-master -l caochong caoc
 echo ${master_id:0:12} > hosts
 for i in $(seq $((N-1)));
 do
-    container_id=$(docker run -d --net caochong -name caochong-$MODE-$i -l caochong caochong-$MODE)
+    container_id=$(docker run -d --net caochong --name caochong-$MODE-$i -l caochong caochong-$MODE)
     echo ${container_id:0:12} >> hosts
 done
 
